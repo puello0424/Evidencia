@@ -40,6 +40,8 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   transition: box-shadow 150ms;
+  container-type: inline-size;
+  min-width: 0;
 }
 .card.is-refreshing {
   position: relative;
@@ -105,6 +107,19 @@
 .card-footer {
   padding: 10px 16px;
   border-top: 1px solid var(--border-color-light);
+}
+
+[data-chart] {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+[data-chart] > div,
+[data-chart] canvas,
+[data-chart] svg {
+  max-width: 100%;
 }
 
 // Table

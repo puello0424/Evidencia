@@ -510,6 +510,7 @@
 // ────────────────────────
 .row { display: grid; gap: var(--space-4); margin-bottom: 16px; }
 .row:last-child { margin-bottom: 0; }
+.row > * { min-width: 0; }
 // minmax(0, …) lets wide intrinsic content (tables, charts, long text)
 // stay contained within its grid track instead of pushing the track wider
 // than its share. Critical for tables and chart cards.

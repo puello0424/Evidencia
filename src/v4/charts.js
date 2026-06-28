@@ -945,6 +945,7 @@ export async function initCharts() {
   ]);
 
   const mounted = []; // { el, factory, instance }
+  const resizeAll = () => mounted.forEach((m) => m.instance.resize());
 
   const buildAll = () => {
     const t = tokens();
@@ -957,13 +958,24 @@ export async function initCharts() {
   };
 
   buildAll();
-
-  // Resize all charts on viewport changes.
-  let timer;
-  window.addEventListener('resize', () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => mounted.forEach((m) => m.instance.resize()), 120);
+  requestAnimationFrame(() => {
+    resizeAll();
+    requestAnimationFrame(resizeAll);
   });
+
+  let timer;
+  const scheduleResize = () => {
+    clearTimeout(timer);
+    timer = setTimeout(resizeAll, 120);
+  };
+
+  // Resize all charts on viewport and container changes. The observer catches
+  // sidebar transitions, grid reflows, and late font/layout shifts.
+  window.addEventListener('resize', scheduleResize);
+  if ('ResizeObserver' in window) {
+    const resizeObserver = new ResizeObserver(scheduleResize);
+    mounted.forEach((m) => resizeObserver.observe(m.el));
+  }
 
   // Rebuild all charts when the theme changes — tokens come from CSS custom
   // properties, so a fresh setOption isn't enough; dispose + re-init picks up
