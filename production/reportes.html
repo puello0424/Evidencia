@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reportes | Gentelella 2026 v4</title>
+<link rel="icon" href="../images/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script type="module" src="/src/main-v4.js"></script>
+<style>
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .report-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .report-layout-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .report-layout-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .report-layout-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .report-layout-desc {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+  }
+
+  .report-palette {
+    display: flex;
+    gap: 10px;
+  }
+
+  .report-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 50px;
+    width: 100%;
+  }
+
+  .report-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+
+  .report-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .report-metric {
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--radius);
+    background: var(--bg-surface-secondary);
+    padding: 10px;
+  }
+
+  .report-metric strong {
+    display: block;
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .report-metric span {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .report-activity-input {
+    grid-column: 1 / -1;
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--radius);
+    background: var(--bg-surface-secondary);
+    padding: 10px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: move;
+  }
+
+  .report-activity-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+  }
+
+  .report-activity-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .report-upload {
+    display: flex;
+    flex-direction: column;
+    min-height: 230px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-surface-secondary);
+    overflow: hidden;
+  }
+
+  .report-preview {
+    position: relative;
+    flex: 1;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
+    padding: 18px;
+  }
+
+  .report-preview img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .report-upload-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--border-color-light);
+    background: var(--bg-surface);
+  }
+
+  .report-file {
+    display: none;
+  }
+
+  .camera-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.55);
+  }
+
+  .camera-panel.open {
+    display: flex;
+  }
+
+  .camera-dialog {
+    width: min(720px, 100%);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  .camera-header,
+  .camera-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color-light);
+  }
+
+  .camera-actions {
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-color-light);
+    border-bottom: 0;
+  }
+
+  .camera-video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: block;
+    background: #0f172a;
+    object-fit: cover;
+  }
+
+  @media (max-width: 1180px) {
+    .reports-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 720px) {
+    .report-layout { grid-template-columns: 1fr; }
+    .report-upload { min-height: 260px; }
+  }
+</style>
+</head>
+<body data-shell="admin" data-page="reportes" data-breadcrumb="Home > Projects > Reportes">
+
+<main class="main">
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <div class="page-pretitle">Projects</div>
+        <h1 class="page-title">Reportes</h1>
+      </div>
+      <!-- <div class="page-actions">
+        <button class="btn btn-outline" data-action="print">Print</button>
+        <button class="btn btn-primary" data-action="export">Export</button>
+      </div> -->
+    </div>
+  </div>
+
+  <div class="reports-grid">
+    <div class="card report-layout" data-report-layout="1">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 1 - Resumen ejecutivo</div>
+            <span class="badge badge-teal">Activo</span>
+          </div>
+          <div class="report-layout-desc">Vista para indicadores principales, estado general y notas rapidas del proyecto.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 1">
+          <span class="report-swatch" style="background:var(--primary)"></span>
+          <span class="report-swatch" style="background:var(--blue)"></span>
+          <span class="report-swatch" style="background:var(--green)"></span>
+        </div>
+        <div class="report-metrics">
+          <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>          
+          <!-- <div class="report-metric"><strong>82%</strong><span>Avance</span></div>
+          <div class="report-metric"><strong>14</strong><span>Tareas</span></div>
+          <div class="report-metric"><strong>3</strong><span>Alertas</span></div>-->
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card report-layout" data-report-layout="2">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 2 - Evidencias</div>
+            <span class="badge badge-blue">Imagen</span>
+          </div>
+          <div class="report-layout-desc">Espacio para evidencias visuales, capturas, comprobantes o fotos del momento.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 2">
+          <span class="report-swatch" style="background:var(--azure)"></span>
+          <span class="report-swatch" style="background:var(--purple)"></span>
+          <span class="report-swatch" style="background:var(--yellow)"></span>
+        </div>
+        <div class="report-metrics">
+         <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>          
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card report-layout" data-report-layout="3">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 3 - Progreso</div>
+            <span class="badge badge-green">OK</span>
+          </div>
+          <div class="report-layout-desc">Bloque para comparar avance planeado, avance real y observaciones del periodo.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 3">
+          <span class="report-swatch" style="background:var(--green)"></span>
+          <span class="report-swatch" style="background:var(--primary)"></span>
+          <span class="report-swatch" style="background:var(--red)"></span>
+        </div>
+        <div class="report-metrics">
+                    <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>          
+
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card report-layout" data-report-layout="4">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 4 - Riesgos</div>
+            <span class="badge badge-red">Atencion</span>
+          </div>
+          <div class="report-layout-desc">Seccion para documentar riesgos, bloqueos, acciones correctivas y responsables.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 4">
+          <span class="report-swatch" style="background:var(--red)"></span>
+          <span class="report-swatch" style="background:var(--yellow)"></span>
+          <span class="report-swatch" style="background:var(--text-muted)"></span>
+        </div>
+        <div class="report-metrics">
+          <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card report-layout" data-report-layout="5">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 5 - Cierre</div>
+            <span class="badge badge-purple">Final</span>
+          </div>
+          <div class="report-layout-desc">Resumen de cierre con resultado, aprobaciones, aprendizaje y siguiente paso.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 5">
+          <span class="report-swatch" style="background:var(--purple)"></span>
+          <span class="report-swatch" style="background:var(--blue)"></span>
+          <span class="report-swatch" style="background:var(--primary)"></span>
+        </div>
+        <div class="report-metrics">
+          <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<div class="camera-panel" id="camera-panel" aria-hidden="true">
+  <div class="camera-dialog" role="dialog" aria-modal="true" aria-labelledby="camera-title">
+    <div class="camera-header">
+      <div>
+        <div class="card-title" id="camera-title">Tomar foto</div>
+        <div class="card-subtitle">La imagen se colocara en el layout seleccionado.</div>
+      </div>
+      <button class="btn btn-outline btn-sm" type="button" id="camera-close">Cerrar</button>
+    </div>
+    <video class="camera-video" id="camera-video" autoplay playsinline></video>
+    <canvas id="camera-canvas" hidden></canvas>
+    <div class="camera-actions">
+      <button class="btn btn-outline" type="button" id="camera-cancel">Cancelar</button>
+      <button class="btn btn-primary" type="button" id="camera-capture">Usar foto</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+let activePreview = null;
+let stream = null;
+
+const panel = document.getElementById('camera-panel');
+const video = document.getElementById('camera-video');
+const canvas = document.getElementById('camera-canvas');
+
+function setPreview(preview, src) {
+  preview.innerHTML = `<img src="${src}" alt="Imagen seleccionada">`;
+}
+
+function stopCamera() {
+  if (stream) {
+    stream.getTracks().forEach((track) => track.stop());
+    stream = null;
+  }
+  video.srcObject = null;
+}
+
+function closeCamera() {
+  stopCamera();
+  panel.classList.remove('open');
+  panel.setAttribute('aria-hidden', 'true');
+}
+
+document.querySelectorAll('.report-file').forEach((input) => {
+  input.addEventListener('change', () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const preview = input.closest('.report-upload').querySelector('.report-preview');
+    setPreview(preview, URL.createObjectURL(file));
+  });
+});
+
+document.querySelectorAll('[data-camera]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    activePreview = button.closest('.report-upload').querySelector('.report-preview');
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      video.srcObject = stream;
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+    } catch (_error) {
+      const fallback = button.closest('.report-upload').querySelector('.report-file');
+      fallback.setAttribute('capture', 'environment');
+      fallback.click();
+    }
+  });
+});
+
+document.getElementById('camera-capture').addEventListener('click', () => {
+  if (!activePreview || !video.videoWidth) return;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  setPreview(activePreview, canvas.toDataURL('image/jpeg', 0.9));
+  closeCamera();
+});
+
+document.getElementById('camera-close').addEventListener('click', closeCamera);
+document.getElementById('camera-cancel').addEventListener('click', closeCamera);
+panel.addEventListener('click', (event) => {
+  if (event.target === panel) closeCamera();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && panel.classList.contains('open')) closeCamera();
+});
+</script>
+
+</body>
+</html>
