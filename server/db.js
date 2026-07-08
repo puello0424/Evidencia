@@ -18,6 +18,11 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+if (!process.env.DB_NAME) {
+  console.error('❌ DB_NAME no está definido. Crea un archivo .env basado en .env.example');
+  process.exit(1);
+}
+
 const pool = mysql.createPool({
   host:            process.env.DB_HOST     || 'localhost',
   port:            Number(process.env.DB_PORT) || 3306,
