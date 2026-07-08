@@ -31,3 +31,5 @@ JQUERY_ELIMINATION_PLAN.md
 # (uploaded to GitHub repo settings directly, not referenced from any committed file)
 docs/social-preview.png
 scripts/social-preview.mjs
+# env local
+.env
