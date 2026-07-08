@@ -18,6 +18,11 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+if (!process.env.DB_NAME) {
+  console.error('❌ DB_NAME no está definido. Crea un archivo .env basado en .env.example');
+  process.exit(1);
+}
+
 const pool = mysql.createPool({
   host:            process.env.DB_HOST     || 'localhost',
   port:            Number(process.env.DB_PORT) || 3306,
@@ -36,6 +41,8 @@ const pool = mysql.createPool({
  */
 export async function testConnection() {
   const conn = await pool.getConnection();
+  // Verificar que la base de datos realmente existe y es accesible
+  await conn.execute('SELECT 1');
   console.log(`✅ MySQL conectado → ${process.env.DB_NAME}@${process.env.DB_HOST || 'localhost'}`);
   conn.release();
 }
