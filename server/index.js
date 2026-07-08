@@ -131,6 +131,7 @@ app.get('/api/:table', async (req, res) => {
     const rows = await db.query(`SELECT * FROM \`${table}\` LIMIT ?`, [limit]);
     res.json({ data: rows, count: rows.length });
   } catch (err) {
+    console.error(`GET /api/${req.params.table} error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -144,6 +145,7 @@ app.get('/api/:table/:id', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'No encontrado' });
     res.json({ data: row });
   } catch (err) {
+    console.error(`GET /api/${req.params.table}/${req.params.id} error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -154,8 +156,10 @@ app.post('/api/:table', async (req, res) => {
   try {
     const { table } = req.params;
     const result = await db.insert(table, req.body);
+    console.log(`✅ Insertado en ${table}`);
     res.status(201).json(result);
   } catch (err) {
+    console.error(`POST /api/${req.params.table} error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -168,6 +172,7 @@ app.put('/api/:table/:id', async (req, res) => {
     const result = await db.update(table, req.body, 'id = ?', [id]);
     res.json(result);
   } catch (err) {
+    console.error(`PUT /api/${req.params.table}/${req.params.id} error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -180,6 +185,7 @@ app.delete('/api/:table/:id', async (req, res) => {
     const result = await db.delete(table, 'id = ?', [id]);
     res.json(result);
   } catch (err) {
+    console.error(`DELETE /api/${req.params.table}/${req.params.id} error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
