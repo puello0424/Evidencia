@@ -9,13 +9,17 @@
  */
 
 import express from 'express';
+import cors from 'cors';
 import { testConnection } from './db.js';
 import db from './db-query.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(express.json());
+// Permitir peticiones desde el frontend Vite (cualquier origen en dev)
+app.use(cors());
+// Imágenes en base64 pueden ser grandes — subir límite a 20mb
+app.use(express.json({ limit: '20mb' }));
 
 // ─── Verificación de salud ────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

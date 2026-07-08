@@ -75,6 +75,7 @@
     "vite": "^8.0.16"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "datatables.net": "^2.3.8",
     "dotenv": "^17.4.2",
     "echarts": "^6.1.0",
