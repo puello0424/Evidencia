@@ -228,10 +228,10 @@
         <div class="page-pretitle">Projects</div>
         <h1 class="page-title">Reportes</h1>
       </div>
-      <!-- <div class="page-actions">
-        <button class="btn btn-outline" data-action="print">Print</button>
-        <button class="btn btn-primary" data-action="export">Export</button>
-      </div> -->
+      <div class="page-actions">
+        <button class="btn btn-primary" id="btn-guardar-reportes">💾 Guardar reportes</button>
+        <span id="guardar-status" style="font-size:13px;color:var(--text-muted);margin-left:10px;"></span>
+      </div>
     </div>
   </div>
 
@@ -480,6 +480,134 @@ panel.addEventListener('click', (event) => {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && panel.classList.contains('open')) closeCamera();
 });
+</script>
+
+<script type="module">
+// ─── Persistencia de reportes ───────────────────────────────────────────────
+const API = 'http://localhost:3001';
+
+const LAYOUTS = [
+  { num: 1, titulo: 'Layout 1 - Resumen ejecutivo' },
+  { num: 2, titulo: 'Layout 2 - Evidencias'        },
+  { num: 3, titulo: 'Layout 3 - Progreso'          },
+  { num: 4, titulo: 'Layout 4 - Riesgos'           },
+  { num: 5, titulo: 'Layout 5 - Cierre'            },
+];
+
+/**
+ * Convierte un <img src="..."> o canvas dataURL a base64 puro + mime.
+ * Soporta: dataURL (cámara/canvas) y blob URL (input file).
+ */
+async function getImageData(preview) {
+  const img = preview.querySelector('img');
+  if (!img) return { base64: null, mime: null, nombre: null };
+
+  const src = img.src;
+
+  // dataURL  (cámara)
+  if (src.startsWith('data:')) {
+    const [header, base64] = src.split(',');
+    const mime = header.match(/data:([^;]+)/)?.[1] || 'image/jpeg';
+    return { base64, mime, nombre: `layout_${Date.now()}.jpg` };
+  }
+
+  // blob URL  (archivo seleccionado)
+  if (src.startsWith('blob:')) {
+    const blob = await fetch(src).then(r => r.blob());
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const [header, base64] = reader.result.split(',');
+        const mime = header.match(/data:([^;]+)/)?.[1] || blob.type || 'image/jpeg';
+        resolve({ base64, mime, nombre: `layout_${Date.now()}.jpg` });
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  return { base64: null, mime: null, nombre: null };
+}
+
+// Cargar reportes guardados al entrar en la página
+async function cargarReportes() {
+  try {
+    const { data } = await fetch(`${API}/api/reportes`).then(r => r.json());
+    for (const reporte of data) {
+      const card = document.querySelector(`[data-report-layout="${reporte.layout_num}"]`);
+      if (!card) continue;
+
+      // Texto
+      const textarea = card.querySelector('.report-activity-input');
+      if (textarea && reporte.descripcion) textarea.value = reporte.descripcion;
+
+      // Imagen — cargar desde endpoint de bytes
+      if (reporte.imagen_mime) {
+        const preview = card.querySelector('.report-preview');
+        preview.innerHTML = `<img src="${API}/api/reportes/${reporte.layout_num}/imagen" alt="Evidencia guardada">`;
+      }
+    }
+  } catch (err) {
+    console.warn('No se pudieron cargar reportes:', err.message);
+  }
+}
+
+// Guardar todos los layouts
+document.getElementById('btn-guardar-reportes').addEventListener('click', async () => {
+  const btn    = document.getElementById('btn-guardar-reportes');
+  const status = document.getElementById('guardar-status');
+  btn.disabled = true;
+  status.textContent = 'Guardando…';
+
+  let ok = 0;
+  let fail = 0;
+
+  for (const layout of LAYOUTS) {
+    const card = document.querySelector(`[data-report-layout="${layout.num}"]`);
+    if (!card) continue;
+
+    const descripcion = card.querySelector('.report-activity-input')?.value?.trim() || null;
+    const preview     = card.querySelector('.report-preview');
+    const { base64, mime, nombre } = await getImageData(preview);
+
+    // Solo guardar si hay algo que persistir
+    if (!descripcion && !base64) continue;
+
+    try {
+      const res = await fetch(`${API}/api/reportes`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          layout_num:    layout.num,
+          layout_titulo: layout.titulo,
+          descripcion,
+          imagen_base64: base64,
+          imagen_mime:   mime,
+          imagen_nombre: nombre,
+        }),
+      });
+      if (res.ok) ok++;
+      else        fail++;
+    } catch {
+      fail++;
+    }
+  }
+
+  btn.disabled = false;
+  if (fail === 0 && ok > 0) {
+    status.style.color = 'var(--green)';
+    status.textContent = `✅ ${ok} layout(s) guardado(s)`;
+  } else if (ok === 0 && fail === 0) {
+    status.style.color = 'var(--text-muted)';
+    status.textContent = 'Nada nuevo que guardar';
+  } else {
+    status.style.color = 'var(--red)';
+    status.textContent = `⚠️ ${ok} ok / ${fail} error(es)`;
+  }
+  setTimeout(() => { status.textContent = ''; }, 4000);
+});
+
+// Cargar al iniciar
+cargarReportes();
 </script>
 
 </body>
