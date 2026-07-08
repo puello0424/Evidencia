@@ -41,6 +41,8 @@ const pool = mysql.createPool({
  */
 export async function testConnection() {
   const conn = await pool.getConnection();
+  // Verificar que la base de datos realmente existe y es accesible
+  await conn.execute('SELECT 1');
   console.log(`✅ MySQL conectado → ${process.env.DB_NAME}@${process.env.DB_HOST || 'localhost'}`);
   conn.release();
 }
