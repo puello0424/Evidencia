@@ -19,7 +19,8 @@ export const NAV = [
           { key: 'dashboard',   href: 'index.html',  text: 'Operations' },
           { key: 'dashboard-2', href: 'index2.html', text: 'Analytics' },
           { key: 'dashboard-3', href: 'index3.html', text: 'Sales' },
-          { key: 'dashboard-4', href: 'index4.html', text: 'System health' }
+          { key: 'dashboard-4', href: 'index4.html', text: 'System health' },
+          { key: 'dashboard-5', href: 'reportes.html', text: 'Reportes' }
         ]
       },
       {

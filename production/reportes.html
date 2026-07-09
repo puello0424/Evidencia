@@ -529,6 +529,7 @@ async function getImageData(preview) {
 }
 
 // Cargar reportes guardados al entrar en la página
+/*
 async function cargarReportes() {
   try {
     const { data } = await fetch(`${API}/api/reportes`).then(r => r.json());
@@ -549,7 +550,7 @@ async function cargarReportes() {
   } catch (err) {
     console.warn('No se pudieron cargar reportes:', err.message);
   }
-}
+}*/
 
 // Guardar todos los layouts
 document.getElementById('btn-guardar-reportes').addEventListener('click', async () => {
