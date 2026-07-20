@@ -20,7 +20,7 @@ export const NAV = [
           { key: 'dashboard-2', href: 'index2.html', text: 'Analytics' },
           { key: 'dashboard-3', href: 'index3.html', text: 'Sales' },
           { key: 'dashboard-4', href: 'index4.html', text: 'System health' },
-          { key: 'reportes',    href: 'reportes.html', text: 'Reportes' }
+          { key: 'dashboard-5', href: 'reportes.html', text: 'Reportes' }
         ]
       },
       {
@@ -82,13 +82,14 @@ export const NAV = [
       { key: 'pricing', href: 'pricing_tables.html', text: 'Pricing', icon: 'price' }
     ]
   },
-  /*{
+  {
     label: 'Projects',
     items: [
       { key: 'projects',       href: 'projects.html',       text: 'All projects', icon: 'projects' },
-      { key: 'project-detail', href: 'project_detail.html', text: 'Project detail', icon: 'pages' }
+      { key: 'project-detail', href: 'project_detail.html', text: 'Project detail', icon: 'pages' },
+      { key: 'reportes',       href: 'reportes.html',       text: 'Reportes',      icon: 'reportes' }
     ]
-  },*/
+  },
   /*{
     label: 'UI library',
     items: [
