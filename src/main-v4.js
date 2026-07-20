@@ -2,6 +2,13 @@
 // Self-contained dashboard skin. Loads only the v4 design system.
 
 import './scss/v4/main.scss';
+import { requireAuth } from './v4/auth.js';
+
+// ─── Auth guard ───────────────────────────────────────────────────────────────
+// Redirige a login.html si no hay sesión activa. Las páginas públicas quedan
+// exentas automáticamente (ver PUBLIC_PAGES en auth.js).
+try { requireAuth(); } catch (e) { if (e.message !== 'AUTH_REDIRECT') throw e; }
+
 import { mountShell } from './v4/shell.js';
 import { initCharts } from './v4/charts.js';
 import { initTables } from './v4/tables.js';

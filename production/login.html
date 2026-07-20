@@ -22,7 +22,10 @@
     <div class="auth-title">Welcome back</div>
     <div class="auth-subtitle">Sign in to continue to your dashboard.</div>
 
-    <form onsubmit="event.preventDefault(); window.location.href='index.html';">
+    <!-- Mensaje de error -->
+    <div id="login-error" style="display:none;background:var(--danger,#dc3545);color:#fff;padding:8px 12px;border-radius:6px;font-size:13px;margin-bottom:12px;"></div>
+
+    <form id="login-form">
       <div class="form-group">
         <label class="form-label" for="email">Email</label>
         <div class="input-group">
@@ -41,12 +44,12 @@
 
       <div class="auth-actions">
         <label class="form-check">
-          <input type="checkbox" checked> Remember me
+          <input type="checkbox" id="remember-me" checked> Remember me
         </label>
         <a href="forgot_password.html">Forgot password?</a>
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;height:38px">
+      <button type="submit" id="login-btn" class="btn btn-primary" style="width:100%;justify-content:center;height:38px">
         Sign in
       </button>
     </form>
@@ -69,6 +72,60 @@
     </div>
   </div>
 </div>
+
+<script type="module">
+  import { saveSession } from '/src/v4/auth.js';
+
+  const API_BASE = 'http://localhost:3001';
+
+  const form     = document.getElementById('login-form');
+  const btnLogin = document.getElementById('login-btn');
+  const errBox   = document.getElementById('login-error');
+
+  function showError(msg) {
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  }
+
+  function hideError() {
+    errBox.style.display = 'none';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError();
+    btnLogin.disabled = true;
+    btnLogin.textContent = 'Signing in…';
+
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      const res  = await fetch(`${API_BASE}/api/auth/login`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        showError(data.error || 'Error al iniciar sesión');
+        return;
+      }
+
+      // Guardar sesión
+      saveSession(data.token, data.user);
+
+      // Redirigir al dashboard
+      window.location.href = 'index.html';
+    } catch (err) {
+      showError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
+    } finally {
+      btnLogin.disabled = false;
+      btnLogin.textContent = 'Sign in';
+    }
+  });
+</script>
 
 </body>
 </html>

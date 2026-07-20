@@ -10,11 +10,30 @@
 
 import express from 'express';
 import cors from 'cors';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { testConnection } from './db.js';
 import db from './db-query.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET   = process.env.JWT_SECRET   || 'evidencia_dev_secret';
+const JWT_EXPIRES  = process.env.JWT_EXPIRES_IN || '8h';
+
+// ─── Middleware de autenticación JWT ─────────────────────────────────────────
+// Úsalo en rutas que requieran usuario logueado:
+//   app.get('/api/recurso-privado', authMiddleware, async (req, res) => { ... })
+export function authMiddleware(req, res, next) {
+  const auth  = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Token requerido' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Token inválido o expirado' });
+  }
+}
 
 // Permitir peticiones desde el frontend Vite (cualquier origen en dev)
 app.use(cors());
@@ -26,7 +45,90 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ─── REPORTES ─────────────────────────────────────────────────────────────────
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/auth/login
+ * Body: { email, password }
+ * Busca el usuario en la tabla `usuarios` (campos: email, password, nombre, id_usu).
+ * Soporta passwords en texto plano y hasheadas con bcrypt.
+ */
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+    }
+
+    // Buscar usuario por correo (tabla: usuario, columnas: correo, contrasena, nombre, id_usu)
+    const user = await db.queryOne(
+      `SELECT * FROM usuario WHERE correo = ? LIMIT 1`,
+      [email]
+    );
+
+    if (!user) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    // Verificar password — soporta bcrypt y texto plano
+    let valid = false;
+    if (user.contrasena && user.contrasena.startsWith('$2')) {
+      // Hash bcrypt
+      valid = await bcrypt.compare(password, user.contrasena);
+    } else {
+      // Texto plano (legacy)
+      valid = user.contrasena === password;
+    }
+
+    if (!valid) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    // Generar token JWT
+    const payload = {
+      id:     user.id_usu,
+      email:  user.correo,
+      nombre: user.nombre,
+    };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+
+    // Devolver token + datos básicos del usuario (sin contrasena)
+    const { contrasena: _pw, ...userSafe } = user;
+    res.json({ ok: true, token, user: userSafe });
+  } catch (err) {
+    console.error('POST /api/auth/login error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/auth/me
+ * Valida el token JWT y devuelve los datos del usuario activo.
+ * Header: Authorization: Bearer <token>
+ */
+app.get('/api/auth/me', (req, res) => {
+  try {
+    const auth = req.headers.authorization || '';
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+    if (!token) return res.status(401).json({ error: 'Token requerido' });
+
+    const payload = jwt.verify(token, JWT_SECRET);
+    res.json({ ok: true, user: payload });
+  } catch (err) {
+    res.status(401).json({ error: 'Token inválido o expirado' });
+  }
+});
+
+/**
+ * POST /api/auth/logout
+ * El logout en JWT es stateless — el cliente descarta el token.
+ * Este endpoint existe para tener un punto de entrada consistente.
+ */
+app.post('/api/auth/logout', (_req, res) => {
+  res.json({ ok: true });
+});
+
+
 
 /**
  * POST /api/reportes
@@ -122,7 +224,7 @@ app.get('/api/reportes/:layout_num/imagen', async (req, res) => {
   }
 });
 
-// ─── Ejemplo: listar registros de una tabla ───────────────────────────────────
+// ─── REPORTES ─────────────────────────────────────────────────────────────────
 // GET /api/:table?limit=50
 app.get('/api/:table', async (req, res) => {
   try {
