@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reportes | Gentelella 2026 v4</title>
+<link rel="icon" href="../images/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script type="module" src="/src/main-v4.js"></script>
+<style>
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .report-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .report-layout-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .report-layout-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .report-layout-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .report-layout-desc {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+  }
+
+  .report-palette {
+    display: flex;
+    gap: 10px;
+  }
+
+  .report-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 50px;
+    width: 100%;
+  }
+
+  .report-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+
+  .report-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .report-metric {
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--radius);
+    background: var(--bg-surface-secondary);
+    padding: 10px;
+  }
+
+  .report-metric strong {
+    display: block;
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .report-metric span {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .report-activity-input {
+    grid-column: 1 / -1;
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--radius);
+    background: var(--bg-surface-secondary);
+    padding: 10px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: move;
+  }
+
+  .report-activity-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+  }
+
+  .report-activity-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .report-upload {
+    display: flex;
+    flex-direction: column;
+    min-height: 230px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-surface-secondary);
+    overflow: hidden;
+  }
+
+  .report-preview {
+    position: relative;
+    flex: 1;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
+    padding: 18px;
+  }
+
+  .report-preview img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .report-upload-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--border-color-light);
+    background: var(--bg-surface);
+  }
+
+  .report-file {
+    display: none;
+  }
+
+  .camera-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.55);
+  }
+
+  .camera-panel.open {
+    display: flex;
+  }
+
+  .camera-dialog {
+    width: min(720px, 100%);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  .camera-header,
+  .camera-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color-light);
+  }
+
+  .camera-actions {
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-color-light);
+    border-bottom: 0;
+  }
+
+  .camera-video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: block;
+    background: #0f172a;
+    object-fit: cover;
+  }
+
+  @media (max-width: 1180px) {
+    .reports-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 720px) {
+    .report-layout { grid-template-columns: 1fr; }
+    .report-upload { min-height: 260px; }
+  }
+</style>
+</head>
+<body data-shell="admin" data-page="reportes" data-breadcrumb="Home > Projects > Reportes">
+
+<main class="main">
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <div class="page-pretitle">Projects</div>
+        <h1 class="page-title">Reportes</h1>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-primary" id="btn-guardar-reportes">💾 Guardar reportes</button>
+        <span id="guardar-status" style="font-size:13px;color:var(--text-muted);margin-left:10px;"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="reports-grid">
+    <div class="card report-layout" data-report-layout="1">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 1 - Resumen ejecutivo</div>
+            <span class="badge badge-teal">Activo</span>
+          </div>
+          <div class="report-layout-desc">Vista para indicadores principales, estado general y notas rapidas del proyecto.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 1">
+          <span class="report-swatch" style="background:var(--primary)"></span>
+          <span class="report-swatch" style="background:var(--blue)"></span>
+          <span class="report-swatch" style="background:var(--green)"></span>
+        </div>
+        <div class="report-metrics">
+          <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>          
+          <!-- <div class="report-metric"><strong>82%</strong><span>Avance</span></div>
+          <div class="report-metric"><strong>14</strong><span>Tareas</span></div>
+          <div class="report-metric"><strong>3</strong><span>Alertas</span></div>-->
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card report-layout" data-report-layout="2">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 2 - Evidencias</div>
+            <span class="badge badge-blue">Imagen</span>
+          </div>
+          <div class="report-layout-desc">Espacio para evidencias visuales, capturas, comprobantes o fotos del momento.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 2">
+          <span class="report-swatch" style="background:var(--azure)"></span>
+          <span class="report-swatch" style="background:var(--purple)"></span>
+          <span class="report-swatch" style="background:var(--yellow)"></span>
+        </div>
+        <div class="report-metrics">
+         <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>          
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card report-layout" data-report-layout="3">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 3 - Progreso</div>
+            <span class="badge badge-green">OK</span>
+          </div>
+          <div class="report-layout-desc">Bloque para comparar avance planeado, avance real y observaciones del periodo.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 3">
+          <span class="report-swatch" style="background:var(--green)"></span>
+          <span class="report-swatch" style="background:var(--primary)"></span>
+          <span class="report-swatch" style="background:var(--red)"></span>
+        </div>
+        <div class="report-metrics">
+                    <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>          
+
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card report-layout" data-report-layout="4">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 4 - Riesgos</div>
+            <span class="badge badge-red">Atencion</span>
+          </div>
+          <div class="report-layout-desc">Seccion para documentar riesgos, bloqueos, acciones correctivas y responsables.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 4">
+          <span class="report-swatch" style="background:var(--red)"></span>
+          <span class="report-swatch" style="background:var(--yellow)"></span>
+          <span class="report-swatch" style="background:var(--text-muted)"></span>
+        </div>
+        <div class="report-metrics">
+          <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card report-layout" data-report-layout="5">
+      <div class="card-body report-layout-body">
+        <div>
+          <div class="report-layout-meta">
+            <div class="report-layout-title">Layout 5 - Cierre</div>
+            <span class="badge badge-purple">Final</span>
+          </div>
+          <div class="report-layout-desc">Resumen de cierre con resultado, aprobaciones, aprendizaje y siguiente paso.</div>
+        </div>
+        <div class="report-palette" aria-label="Paleta del layout 5">
+          <span class="report-swatch" style="background:var(--purple)"></span>
+          <span class="report-swatch" style="background:var(--blue)"></span>
+          <span class="report-swatch" style="background:var(--primary)"></span>
+        </div>
+        <div class="report-metrics">
+          <textarea class="report-activity-input" placeholder="Descripción de la actividad" aria-label="Notas del proyecto" draggable="true"></textarea>
+        </div>
+      </div>
+      <div class="report-upload">
+        <div class="report-preview">Sube una imagen o toma una foto</div>
+        <div class="report-upload-actions">
+          <label class="btn btn-outline btn-sm">
+            Archivo
+            <input class="report-file" type="file" accept="image/*">
+          </label>
+          <button class="btn btn-primary btn-sm" type="button" data-camera>Camara</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<div class="camera-panel" id="camera-panel" aria-hidden="true">
+  <div class="camera-dialog" role="dialog" aria-modal="true" aria-labelledby="camera-title">
+    <div class="camera-header">
+      <div>
+        <div class="card-title" id="camera-title">Tomar foto</div>
+        <div class="card-subtitle">La imagen se colocara en el layout seleccionado.</div>
+      </div>
+      <button class="btn btn-outline btn-sm" type="button" id="camera-close">Cerrar</button>
+    </div>
+    <video class="camera-video" id="camera-video" autoplay playsinline></video>
+    <canvas id="camera-canvas" hidden></canvas>
+    <div class="camera-actions">
+      <button class="btn btn-outline" type="button" id="camera-cancel">Cancelar</button>
+      <button class="btn btn-primary" type="button" id="camera-capture">Usar foto</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+let activePreview = null;
+let stream = null;
+
+const panel = document.getElementById('camera-panel');
+const video = document.getElementById('camera-video');
+const canvas = document.getElementById('camera-canvas');
+
+function setPreview(preview, src) {
+  preview.innerHTML = `<img src="${src}" alt="Imagen seleccionada">`;
+}
+
+function stopCamera() {
+  if (stream) {
+    stream.getTracks().forEach((track) => track.stop());
+    stream = null;
+  }
+  video.srcObject = null;
+}
+
+function closeCamera() {
+  stopCamera();
+  panel.classList.remove('open');
+  panel.setAttribute('aria-hidden', 'true');
+}
+
+document.querySelectorAll('.report-file').forEach((input) => {
+  input.addEventListener('change', () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const preview = input.closest('.report-upload').querySelector('.report-preview');
+    setPreview(preview, URL.createObjectURL(file));
+  });
+});
+
+document.querySelectorAll('[data-camera]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    activePreview = button.closest('.report-upload').querySelector('.report-preview');
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      video.srcObject = stream;
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+    } catch (_error) {
+      const fallback = button.closest('.report-upload').querySelector('.report-file');
+      fallback.setAttribute('capture', 'environment');
+      fallback.click();
+    }
+  });
+});
+
+document.getElementById('camera-capture').addEventListener('click', () => {
+  if (!activePreview || !video.videoWidth) return;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  setPreview(activePreview, canvas.toDataURL('image/jpeg', 0.9));
+  closeCamera();
+});
+
+document.getElementById('camera-close').addEventListener('click', closeCamera);
+document.getElementById('camera-cancel').addEventListener('click', closeCamera);
+panel.addEventListener('click', (event) => {
+  if (event.target === panel) closeCamera();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && panel.classList.contains('open')) closeCamera();
+});
+</script>
+
+<script type="module">
+// ─── Persistencia de reportes ───────────────────────────────────────────────
+const API = 'http://localhost:3001';
+
+const LAYOUTS = [
+  { num: 1, titulo: 'Layout 1 - Resumen ejecutivo' },
+  { num: 2, titulo: 'Layout 2 - Evidencias'        },
+  { num: 3, titulo: 'Layout 3 - Progreso'          },
+  { num: 4, titulo: 'Layout 4 - Riesgos'           },
+  { num: 5, titulo: 'Layout 5 - Cierre'            },
+];
+
+/**
+ * Convierte un <img src="..."> o canvas dataURL a base64 puro + mime.
+ * Soporta: dataURL (cámara/canvas) y blob URL (input file).
+ */
+async function getImageData(preview) {
+  const img = preview.querySelector('img');
+  if (!img) return { base64: null, mime: null, nombre: null };
+
+  const src = img.src;
+
+  // dataURL  (cámara)
+  if (src.startsWith('data:')) {
+    const [header, base64] = src.split(',');
+    const mime = header.match(/data:([^;]+)/)?.[1] || 'image/jpeg';
+    return { base64, mime, nombre: `layout_${Date.now()}.jpg` };
+  }
+
+  // blob URL  (archivo seleccionado)
+  if (src.startsWith('blob:')) {
+    const blob = await fetch(src).then(r => r.blob());
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const [header, base64] = reader.result.split(',');
+        const mime = header.match(/data:([^;]+)/)?.[1] || blob.type || 'image/jpeg';
+        resolve({ base64, mime, nombre: `layout_${Date.now()}.jpg` });
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  return { base64: null, mime: null, nombre: null };
+}
+
+// Cargar reportes guardados al entrar en la página
+async function cargarReportes() {
+  try {
+    const { data } = await fetch(`${API}/api/reportes`).then(r => r.json());
+    for (const reporte of data) {
+      const card = document.querySelector(`[data-report-layout="${reporte.layout_num}"]`);
+      if (!card) continue;
+
+      // Texto
+      const textarea = card.querySelector('.report-activity-input');
+      if (textarea && reporte.descripcion) textarea.value = reporte.descripcion;
+
+      // Imagen — cargar desde endpoint de bytes
+      if (reporte.imagen_mime) {
+        const preview = card.querySelector('.report-preview');
+        preview.innerHTML = `<img src="${API}/api/reportes/${reporte.layout_num}/imagen" alt="Evidencia guardada">`;
+      }
+    }
+  } catch (err) {
+    console.warn('No se pudieron cargar reportes:', err.message);
+  }
+}
+
+// Guardar todos los layouts
+document.getElementById('btn-guardar-reportes').addEventListener('click', async () => {
+  const btn    = document.getElementById('btn-guardar-reportes');
+  const status = document.getElementById('guardar-status');
+  btn.disabled = true;
+  status.textContent = 'Guardando…';
+
+  let ok = 0;
+  let fail = 0;
+
+  for (const layout of LAYOUTS) {
+    const card = document.querySelector(`[data-report-layout="${layout.num}"]`);
+    if (!card) continue;
+
+    const descripcion = card.querySelector('.report-activity-input')?.value?.trim() || null;
+    const preview     = card.querySelector('.report-preview');
+    const { base64, mime, nombre } = await getImageData(preview);
+
+    // Solo guardar si hay algo que persistir
+    if (!descripcion && !base64) continue;
+
+    try {
+      const res = await fetch(`${API}/api/reportes`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          layout_num:    layout.num,
+          layout_titulo: layout.titulo,
+          descripcion,
+          imagen_base64: base64,
+          imagen_mime:   mime,
+          imagen_nombre: nombre,
+        }),
+      });
+      if (res.ok) ok++;
+      else        fail++;
+    } catch {
+      fail++;
+    }
+  }
+
+  btn.disabled = false;
+  if (fail === 0 && ok > 0) {
+    status.style.color = 'var(--green)';
+    status.textContent = `✅ ${ok} layout(s) guardado(s)`;
+  } else if (ok === 0 && fail === 0) {
+    status.style.color = 'var(--text-muted)';
+    status.textContent = 'Nada nuevo que guardar';
+  } else {
+    status.style.color = 'var(--red)';
+    status.textContent = `⚠️ ${ok} ok / ${fail} error(es)`;
+  }
+  setTimeout(() => { status.textContent = ''; }, 4000);
+});
+
+// Cargar al iniciar
+cargarReportes();
+</script>
+
+</body>
+</html>

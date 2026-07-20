@@ -9,6 +9,7 @@ import { renderShell } from './shell-render.js';
 import { openPanel, openMenu } from './menus.js';
 import { showToast } from './toast.js';
 import { showModal } from './modal.js';
+import { logout } from './auth.js';
 
 function injectShellIfMissing() {
   const body = document.body;
@@ -300,7 +301,7 @@ function openSignOutModal() {
         variant: 'primary',
         action: () => {
           showToast('Signed out', { variant: 'success' });
-          setTimeout(() => { window.location.href = 'login.html'; }, 600);
+          setTimeout(() => { logout(); }, 600);
         }
       }
     ]

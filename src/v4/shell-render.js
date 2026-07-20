@@ -8,6 +8,7 @@
 // or a parent with `children: [{ key, href, text, badge? }]` for a submenu.
 // The parent is `key`-less; its children carry their own keys for the
 // `data-page` highlight match. The parent stays expanded if any child matches.
+
 export const NAV = [
   {
     label: 'General',
@@ -18,11 +19,12 @@ export const NAV = [
           { key: 'dashboard',   href: 'index.html',  text: 'Operations' },
           { key: 'dashboard-2', href: 'index2.html', text: 'Analytics' },
           { key: 'dashboard-3', href: 'index3.html', text: 'Sales' },
-          { key: 'dashboard-4', href: 'index4.html', text: 'System health' }
+          { key: 'dashboard-4', href: 'index4.html', text: 'System health' },
+          { key: 'reportes',    href: 'reportes.html', text: 'Reportes' }
         ]
       },
       {
-        text: 'Forms', icon: 'forms', badge: { text: 'Hot', cls: 'badge-red' },
+        text: 'Forms', icon: 'forms', badge: { text: 'Hot', cls: 'badge-red' }, hidden: true,
         children: [
           { key: 'forms',            href: 'form.html',            text: 'General' },
           { key: 'form-advanced',    href: 'form_advanced.html',   text: 'Advanced controls' },
@@ -33,7 +35,7 @@ export const NAV = [
         ]
       },
       {
-        text: 'Tables', icon: 'tables',
+        text: 'Tables', icon: 'tables',hidden: true,
         children: [
           { key: 'tables',         href: 'tables.html',         text: 'Static' },
           { key: 'tables-dynamic', href: 'tables_dynamic.html', text: 'Dynamic' }
@@ -52,16 +54,19 @@ export const NAV = [
     ]
   },
   {
-    label: 'Apps',
+    /*label: 'Apps',*/
     items: [
-      { key: 'chat',          href: 'chat.html',          text: 'Chat',          icon: 'chat', badge: { text: '3', cls: 'badge-teal' } },
-      { key: 'inbox',         href: 'inbox.html',         text: 'Inbox',         icon: 'mail' },
-      { key: 'kanban',        href: 'kanban.html',        text: 'Kanban',        icon: 'kanban' },
-      { key: 'files',         href: 'file_manager.html',  text: 'Files',         icon: 'files' },
-      { key: 'notifications', href: 'notifications.html', text: 'Notifications', icon: 'bell' }
+      { key: 'chat',          href: 'chat.html',          text: 'Chat',          icon: 'chat', badge: { text: '3', cls: 'badge-teal' },hidden: true },
+      { key: 'inbox',         href: 'inbox.html',         text: 'Inbox',         icon: 'mail' ,hidden: true},
+      { key: 'inbox',         href: 'inbox.html',         text: 'Inbox',         icon: 'mail' ,hidden: true},
+      { key: 'kanban',        href: 'kanban.html',        text: 'Kanban',        icon: 'kanban', hidden: true },
+      { key: 'inbox',         href: 'inbox.html',         text: 'Inbox',         icon: 'mail' ,hidden: true},
+      { key: 'files',         href: 'file_manager.html',  text: 'Files',         icon: 'files' ,hidden: true},
+      { key: 'inbox',         href: 'inbox.html',         text: 'Inbox',         icon: 'mail' ,hidden: true},
+      { key: 'notifications', href: 'notifications.html', text: 'Notifications', icon: 'bell' ,hidden: true}
     ]
   },
-  {
+  /*{
     label: 'E-commerce',
     items: [
       { key: 'storefront', href: 'e_commerce.html',    text: 'Storefront', icon: 'shop' },
@@ -77,14 +82,14 @@ export const NAV = [
       { key: 'pricing', href: 'pricing_tables.html', text: 'Pricing', icon: 'price' }
     ]
   },
-  {
+  /*{
     label: 'Projects',
     items: [
       { key: 'projects',       href: 'projects.html',       text: 'All projects', icon: 'projects' },
       { key: 'project-detail', href: 'project_detail.html', text: 'Project detail', icon: 'pages' }
     ]
-  },
-  {
+  },*/
+  /*{
     label: 'UI library',
     items: [
       { key: 'ui',         href: 'general_elements.html', text: 'Elements',   icon: 'ui' },
@@ -95,8 +100,8 @@ export const NAV = [
       { key: 'icons',      href: 'icons.html',            text: 'Icons',      icon: 'icons' },
       { key: 'media',      href: 'media_gallery.html',    text: 'Media',      icon: 'media' }
     ]
-  },
-  {
+  },*/
+  /*{
     label: 'Admin',
     items: [
       { key: 'users',           href: 'contacts.html',         text: 'Contacts',        icon: 'users' },
@@ -105,14 +110,14 @@ export const NAV = [
       { key: 'settings',        href: 'settings.html',         text: 'Settings',        icon: 'settings' },
       { key: 'faq',             href: 'faq.html',              text: 'Help center',     icon: 'help' }
     ]
-  },
+  },*/
   {
-    label: 'Layouts',
+    /*label: 'Layouts',*/
     items: [
-      { key: 'fixed-sidebar', href: 'fixed_sidebar.html', text: 'Fixed sidebar', icon: 'layout' },
-      { key: 'fixed-footer',  href: 'fixed_footer.html',  text: 'Fixed footer',  icon: 'layout' },
-      { key: 'level2',        href: 'level2.html',        text: 'Nested page',   icon: 'pages' },
-      { key: 'plain',         href: 'plain_page.html',    text: 'Blank',         icon: 'pages' }
+      { key: 'fixed-sidebar', href: 'fixed_sidebar.html', text: 'Fixed sidebar', icon: 'layout', hidden: true },
+      { key: 'fixed-footer',  href: 'fixed_footer.html',  text: 'Fixed footer',  icon: 'layout', hidden: true },
+      { key: 'level2',        href: 'level2.html',        text: 'Nested page',   icon: 'pages' ,hidden: true},
+      { key: 'plain',         href: 'plain_page.html',    text: 'Blank',         icon: 'pages' ,hidden: true}
     ]
   }
 ];
@@ -146,12 +151,14 @@ export const ICONS = {
   icons:     '<svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>',
   layout:    '<svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/></svg>',
   code:      '<svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>',
-  paint:     '<svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5a2 2 0 00-2 2v2a2 2 0 002 2h2v3a1 1 0 001 1h3a1 1 0 001-1v-3h7a2 2 0 002-2v-2a2 2 0 00-2-2z"/><path d="M19 11V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v6"/></svg>'
+  paint:     '<svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5a2 2 0 00-2 2v2a2 2 0 002 2h2v3a1 1 0 001 1h3a1 1 0 001-1v-3h7a2 2 0 002-2v-2a2 2 0 00-2-2z"/><path d="M19 11V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v6"/></svg>',
+  reportes:  '<svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H6a3 3 0 00-3 3v12a3 3 0 003 3h12a3 3 0 003-3V10z"/><path d="M14 3v4a3 3 0 003 3h4"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/></svg>'
 };
 
 const CHEVRON = '<svg class="nav-chev" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 4l4 4-4 4"/></svg>';
 
 function renderNavItem(item, activeKey) {
+  if (item.hidden) return '';
   if (item.children) {
     const childActive = item.children.some((c) => c.key === activeKey);
     const sub = item.children.map((c) => {
@@ -257,8 +264,8 @@ export function renderTopbar(breadcrumb) {
 export function renderFooter() {
   return `
     <footer class="footer">
-      <span>Gentelella — A free Bootstrap admin template by <a href="https://colorlib.com">Colorlib</a></span>
-      <span>v4.0 Concept · 2026</span>
+     <!-- <span>Gentelella — A free Bootstrap admin template by <a href="https://colorlib.com">Colorlib</a></span> 
+      <span>v4.0 Concept · 2026</span>-->
     </footer>
   `;
 }
